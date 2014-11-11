@@ -11,9 +11,11 @@
   ],
   "require": {
     "php": ">=5.4.0",
-    "illuminate/support": "4.*"
+    "illuminate/support": "4.*",
+    "that0n3guy/transliteration": "1.0.x"
   },
   "autoload": {
+    "files": ["vendor/jbroadway/urlify/URLify.php"],
     "psr-4": {
       "Devfactory\\Media\\": "src/"
     }

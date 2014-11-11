@@ -18,4 +18,18 @@ return array(
    */
   'sub_directories' => TRUE,
 
+  /**
+   * Define how to rename filenames, options are:
+   *
+   * - 'nothing' [NOT RECOMMENDED¨]
+   *   Don't rename the file, leave as is when uploaded.
+   *
+   * - 'unique'
+   *   Generate a unique filename by using a hash of the current datetime
+   *
+   * - 'transliterate'
+   *   Clean up the file name, lowercasing all letters, replacing
+   *   spaces with _'s and removing accents and special characters.
+   */
+  'rename' => 'transliterate',
 );
