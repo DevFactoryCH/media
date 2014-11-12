@@ -209,6 +209,16 @@ trait MediaTrait {
   }
 
   /**
+   * Calculate the weight of the image compared to others in the type
+   *
+   * @return int
+   *  The weight of the image in relation to the others
+   */
+  private function getWeight() {
+    return $this->media()->where('type', $this->type)->count();
+  }
+
+  /**
    * Insert the media into the database
    *
    * @return object
@@ -228,7 +238,7 @@ trait MediaTrait {
       'size' => $this->file->getSize(),
       'type' => $this->type,
       'status' => TRUE,
-      'weight' => 0,
+      'weight' => $this->getWeight(),
     ];
 
     return $this->media()->save(new Media($media));
