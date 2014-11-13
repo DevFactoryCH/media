@@ -128,6 +128,22 @@ trait MediaTrait {
   }
 
   /**
+   * Get all the media assigned to the current model instance
+   * by the given $type
+   *
+   * @param $id int
+   *  The ID of the media media to retrieve
+   *
+   * @return object
+   *  A Illuminate\Database\Eloquent\Collection Object of
+   *  Devfactory\Media\Models\Media Objects
+   */
+  private function getMediaById($id) {
+    return $this->media()
+      ->find($id);
+  }
+
+  /**
    * Delete all the media assigned to the current model instance
    *
    * @param $type string
@@ -137,11 +153,20 @@ trait MediaTrait {
    *  The number of elements deleted
    */
   public function deleteMedia($type = NULL) {
-    if (is_null($type)) {
-      return $this->removeMedia();
-    }
+    return $this->removeMedia($this->getMedia($type));
+  }
 
-    return $this->removeMedia($type);
+  /**
+   * Delete all the media assigned to the current model instance
+   *
+   * @param $id int
+   *  The ID of the media to delete
+   *
+   * @return int
+   *  The number of elements deleted
+   */
+  public function deleteMediaById($id) {
+    return $this->removeMedia($this->getMediaById($id));
   }
 
   /**
@@ -169,11 +194,9 @@ trait MediaTrait {
    *
    * @return void
    */
-  private function removeMedia($type = NULL) {
-    foreach ($this->getMedia($type) as $media) {
-      File::delete($this->public_path . $this->files_directory . $media->filename);
-      $media->delete();
-    }
+  private function removeMedia($media) {
+    File::delete($this->public_path . $this->files_directory . $media->filename);
+    $media->delete();
   }
 
   /**
