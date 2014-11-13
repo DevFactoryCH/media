@@ -30,9 +30,6 @@ trait MediaTrait {
    * but actual trait __contruct()'s are bad apparently)
    */
   private function setup() {
-    $this->filename_original = $this->file->getClientOriginalName();
-    $this->filename_new = $this->getFilename();
-
     $this->public_path = rtrim(Config::get('media::public_path'), '/\\') . '/';
     $this->files_directory = rtrim(ltrim(Config::get('media::files_directory'), '/\\'), '/\\') . '/';
 
@@ -44,6 +41,9 @@ trait MediaTrait {
     }
 
     $this->directory .= $this->directory_uri;
+
+    $this->filename_original = $this->file->getClientOriginalName();
+    $this->filename_new = $this->getFilename();
   }
 
   /**
@@ -153,7 +153,14 @@ trait MediaTrait {
    *  The number of elements deleted
    */
   public function deleteMedia($type = NULL) {
-    return $this->removeMedia($this->getMedia($type));
+    $media = $this->getMedia($type);
+
+    $count = 0;
+    foreach ($media as $item) {
+      $count += $this->removeMedia($item);
+    }
+
+    return $count;
   }
 
   /**
@@ -220,15 +227,51 @@ trait MediaTrait {
   private function getFilename() {
     switch (Config::get('media::rename')) {
       case 'transliterate':
-        return \Transliteration::clean_filename($this->filename_original);
+        $this->filename_new = \Transliteration::clean_filename($this->filename_original);
         break;
       case 'unique':
-        return md5(microtime() . str_random(5)) .'.'. $this->filename_original;
+        $this->filename_new = md5(microtime() . str_random(5)) .'.'. $this->filename_original;
         break;
       case 'nothing':
-        return $this->file->getClientOriginalName();
+        $this->filename_new = $this->file->getClientOriginalName();
         break;
     }
+
+    return $this->fileExistsRename();
+  }
+
+  /**
+   * Checks if a file exists and creates a new name if it does
+   *
+   * @return string
+   *  The uniquely named file
+   */
+  private function fileExistsRename() {
+    if (!File::exists($this->directory . $this->filename_new)) {
+      return $this->filename_new;
+    }
+
+    return $this->fileRename();
+  }
+
+  /**
+   * Appends _X to the file's basename if it already exists
+   *
+   * @return string
+   *  The newly renamed file
+   */
+  private function fileRename() {
+    $filename = $this->filename_new;
+    $extension = '.' . File::extension($this->filename_new);
+    $basename = rtrim($filename, $extension);
+
+    $increment = 0;
+
+    while (File::exists($this->directory . $filename)) {
+      $filename = $basename . '_' . ++$increment . $extension;
+    }
+
+    return $this->filename_new = $filename;
   }
 
   /**
