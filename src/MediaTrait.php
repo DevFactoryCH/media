@@ -10,8 +10,8 @@ trait MediaTrait {
 
   protected $file;
 
+  protected $group;
   protected $type;
-  protected $op;
 
   protected $args;
 
@@ -61,13 +61,13 @@ trait MediaTrait {
    * @param $file object
    *  The Symfony\Component\HttpFoundation\File\UploadedFile Object
    *
-   * @param $type string
-   *  The type of file being uploaded, to allow for say a profile picture and a
+   * @param $group string
+   *  The group of file being uploaded, to allow for say a profile picture and a
    *  background to be uploaded for a user
    *
-   * @param $op string
-   *  If the existing media is to be overwritten (1 file) or if we keep the old
-   *  media and add this one after (Multiple files)
+   * @param $type string
+   *  If the field is for a single file that gets deleted set it to 'single',
+   *  or if it is a multiple file upload, set it to 'multiple'
    *
    * @param $args array
    *  An array of extra options for the file
@@ -75,15 +75,19 @@ trait MediaTrait {
    * @return object
    *  The Devfactory\Media\Models\Media Object
    */
-  public function saveMedia($file, $type = 'default', $op = 'overwrite', $args = []) {
+  public function saveMedia($file, $group = 'default', $type = 'single', $args = []) {
     $this->file = $file;
-    $this->type = $type;
-    $this->op   = $op;
+    $this->group = $group;
+    $this->type   = $type;
     $this->args = $args;
 
     $this->setup();
 
     $this->parseArgs();
+
+    if ($this->type == 'single') {
+      $this->removeExistingMedia();
+    }
 
     $result = $this->databasePut();
 
@@ -95,41 +99,41 @@ trait MediaTrait {
   /**
    * Get all the media assigned to the current model instance
    *
-   * @param $type string
-   *  The file type to retrieve
+   * @param $group string
+   *  The file group to retrieve
    *
    * @return object
    *  A Illuminate\Database\Eloquent\Collection Object of
    *  Devfactory\Media\Models\Media Objects
    */
-  public function getMedia($type = NULL) {
-    if (is_null($type)) {
+  public function getMedia($group = NULL) {
+    if (is_null($group)) {
       return $this->media()->get();
     }
 
-    return $this->getMediaByType($type);
+    return $this->getMediaByGroup($group);
   }
 
   /**
    * Get all the media assigned to the current model instance
-   * by the given $type
+   * by the given $group
    *
-   * @param $type string
-   *  The file type to retrieve
+   * @param $group string
+   *  The file group to retrieve
    *
    * @return object
    *  A Illuminate\Database\Eloquent\Collection Object of
    *  Devfactory\Media\Models\Media Objects
    */
-  private function getMediaByType($type) {
+  private function getMediaByGroup($group) {
     return $this->media()
-      ->where('type', $type)
+      ->where('group', $group)
       ->get();
   }
 
   /**
    * Get all the media assigned to the current model instance
-   * by the given $type
+   * by the given $group
    *
    * @param $id int
    *  The ID of the media media to retrieve
@@ -146,14 +150,14 @@ trait MediaTrait {
   /**
    * Delete all the media assigned to the current model instance
    *
-   * @param $type string
-   *  The file type to delete
+   * @param $group string
+   *  The file group to delete
    *
    * @return int
    *  The number of elements deleted
    */
-  public function deleteMedia($type = NULL) {
-    $media = $this->getMedia($type);
+  public function deleteMedia($group = NULL) {
+    $media = $this->getMedia($group);
 
     $count = 0;
     foreach ($media as $item) {
@@ -178,17 +182,17 @@ trait MediaTrait {
 
   /**
    * Delete all the media assigned to the current model instance by
-   * the give $type
+   * the give $group
    *
-   * @param $type string
-   *  The file type to delete
+   * @param $group string
+   *  The file group to delete
    *
    * @return int
    *  The number of elements deleted
    */
-  private function deleteMediaByType($type) {
+  private function deleteMediaByGroup($group) {
     return $this->media()
-      ->where('type', $type)
+      ->where('group', $group)
       ->delete();
   }
 
@@ -196,8 +200,8 @@ trait MediaTrait {
    * Perform the actual delete of the database row and removal of the
    * file from the filesystem
    *
-   * @param $type string
-   *  The file type to delete
+   * @param $group string
+   *  The file group to delete
    *
    * @return void
    */
@@ -275,13 +279,13 @@ trait MediaTrait {
   }
 
   /**
-   * Calculate the weight of the image compared to others in the type
+   * Calculate the weight of the image compared to others in the group
    *
    * @return int
    *  The weight of the image in relation to the others
    */
   private function getWeight() {
-    return $this->media()->where('type', $this->type)->count();
+    return $this->media()->where('group', $this->group)->count();
   }
 
   /**
@@ -291,18 +295,11 @@ trait MediaTrait {
    *  Devfactory\Media\Models\Media Object
    */
   private function databasePut() {
-    if ($this->op == 'overwrite') {
-      $existing_media = $this->getMedia($this->type);
-      if (!$existing_media->isEmpty()) {
-        $this->deleteMedia();
-      }
-    }
-
     $media = [
       'filename' => $this->directory_uri . $this->filename_new,
-      'mime' => $this->file->getMimeType(),
+      'mime' => $this->file->getMimeGroup(),
       'size' => $this->file->getSize(),
-      'type' => $this->type,
+      'group' => $this->group,
       'status' => TRUE,
       'weight' => $this->getWeight(),
     ];
@@ -311,14 +308,45 @@ trait MediaTrait {
   }
 
   /**
+   * Remove any media that already exists for the current group type
+   *
+   * @return int
+   *  The number of elements removed
+   */
+  private function removeExistingMedia() {
+    $existing_media = $this->getMedia($this->group);
+
+    if (!$existing_media->isEmpty()) {
+      return $this->deleteMedia();
+    }
+
+    return 0;
+  }
+
+  /**
    * Write the media to the file system
    */
   private function storagePut() {
-    if (!File::isDirectory($this->directory)) {
-      File::makeDirectory($this->directory, 0755, TRUE);
+    if ($this->makeDirectory($this->directory)) {
+      $this->file->move($this->directory, $this->filename_new);
+    }
+  }
+
+  /**
+   * Creates the passed directory if it doesn't exist
+   *
+   * @param $directory string
+   *  The full path of the directory to create
+   *
+   * @return bool
+   *  TRUE if the directory exists, FALSE if it could not be created
+   */
+  private function makeDirectory($directory) {
+    if (File::isDirectory($directory)) {
+      return TRUE;
     }
 
-    $this->file->move($this->directory, $this->filename_new);
+    return File::makeDirectory($directory, 0755, TRUE);
   }
 
 }

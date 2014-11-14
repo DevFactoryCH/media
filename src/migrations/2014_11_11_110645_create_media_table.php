@@ -23,7 +23,7 @@ class CreateMediaTable extends Migration {
       $table->string('name');
       $table->string('alt');
       $table->string('title');
-      $table->string('type');
+      $table->string('group');
       $table->boolean('status');
       $table->integer('weight')->unsigned()->default(0);
 			$table->timestamps();
