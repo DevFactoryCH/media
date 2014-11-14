@@ -297,7 +297,7 @@ trait MediaTrait {
   private function databasePut() {
     $media = [
       'filename' => $this->directory_uri . $this->filename_new,
-      'mime' => $this->file->getMimeGroup(),
+      'mime' => $this->file->getMimeType(),
       'size' => $this->file->getSize(),
       'group' => $this->group,
       'status' => TRUE,

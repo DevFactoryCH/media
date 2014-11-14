@@ -11,7 +11,7 @@ class Media extends \Eloquent {
     'name',
     'alt',
     'title',
-    'type',
+    'group',
     'status',
     'weight',
   ];
