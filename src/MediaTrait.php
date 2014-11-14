@@ -98,6 +98,18 @@ trait MediaTrait {
     return $result;
   }
 
+  /**
+   * Update the meta data of a certain media file.
+   *
+   * @param $id int
+   *  The ID of the media item to update
+   *
+   * @param $options array
+   *  An key => value array of elements in the DB to change, key must be one of:
+   *    'alt', 'title', 'name', 'weight'
+   *
+   * @return void
+   */
   public function updateMediaById($id, $options) {
     $this->options = $options;
 
@@ -108,6 +120,7 @@ trait MediaTrait {
     $this->media->alt = $this->getAlt();
     $this->media->title = $this->getTitle();
     $this->media->name = $this->getName();
+    $this->media->weight = $this->getWeight();
 
     $this->media->save();
   }
@@ -124,7 +137,7 @@ trait MediaTrait {
    */
   public function getMedia($group = NULL) {
     if (is_null($group)) {
-      return $this->media()->get();
+      return $this->media()->orderBy('weight', 'ASC')->get();
     }
 
     return $this->getMediaByGroup($group);
@@ -144,6 +157,7 @@ trait MediaTrait {
   private function getMediaByGroup($group) {
     return $this->media()
       ->where('group', $group)
+      ->orderBy('weight', 'ASC')
       ->get();
   }
 
@@ -353,12 +367,21 @@ trait MediaTrait {
   }
 
   /**
-   * Calculate the weight of the image compared to others in the group
+   * Calculate the weight of the image from options, then from existing media,
+   * then compared to others in the group
    *
    * @return int
-   *  The weight of the image in relation to the others
+   *  The weight of the image
    */
   private function getWeight() {
+    if (!is_null($this->options->weight)) {
+      return $this->options->weight;
+    }
+
+    if (!is_null($this->media)) {
+      return $this->media->weight;
+    }
+
     return $this->media()->where('group', $this->group)->count();
   }
 
