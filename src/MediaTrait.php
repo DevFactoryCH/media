@@ -10,10 +10,12 @@ trait MediaTrait {
 
   protected $file;
 
+  protected $media;
+
   protected $group;
   protected $type;
 
-  protected $args;
+  protected $options;
 
   protected $filename_original;
   protected $filename_new;
@@ -69,21 +71,21 @@ trait MediaTrait {
    *  If the field is for a single file that gets deleted set it to 'single',
    *  or if it is a multiple file upload, set it to 'multiple'
    *
-   * @param $args array
+   * @param $options array
    *  An array of extra options for the file
    *
    * @return object
    *  The Devfactory\Media\Models\Media Object
    */
-  public function saveMedia($file, $group = 'default', $type = 'single', $args = []) {
+  public function saveMedia($file, $group = 'default', $type = 'single', $options = []) {
     $this->file = $file;
     $this->group = $group;
     $this->type   = $type;
-    $this->args = $args;
+    $this->options = $options;
 
     $this->setup();
 
-    $this->parseArgs();
+    $this->parseOptions();
 
     if ($this->type == 'single') {
       $this->removeExistingMedia();
@@ -94,6 +96,20 @@ trait MediaTrait {
     $this->storagePut();
 
     return $result;
+  }
+
+  public function updateMediaById($id, $options) {
+    $this->options = $options;
+
+    $this->parseOptions();
+
+    $this->media = Media::find($id);
+
+    $this->media->alt = $this->getAlt();
+    $this->media->title = $this->getTitle();
+    $this->media->name = $this->getName();
+
+    $this->media->save();
   }
 
   /**
@@ -213,13 +229,17 @@ trait MediaTrait {
   /**
    * Parse the optional arguments and merge them with the defaults
    */
-  private function parseArgs() {
-    $default_args = [
+  private function parseOptions() {
+    $default_options = [
+      'alt' => NULL,
+      'title' => NULL,
+      'name' => NULL,
+      'weight' => NULL,
     ];
 
-    $this->args = $this->args + $default_args;
+    $this->options += $default_options;
 
-    $this->args = (object) $this->args;
+    $this->options = (object) $this->options;
   }
 
   /**
@@ -279,6 +299,60 @@ trait MediaTrait {
   }
 
   /**
+   * Get the alt text for the file, from options, then from db, otherwise ''
+   *
+   * @return string
+   *  The Alt text
+   */
+  private function getAlt() {
+    if (!is_null($this->options->alt)) {
+      return $this->options->alt;
+    }
+
+    if (!is_null($this->media)) {
+      return $this->media->alt;
+    }
+
+    return '';
+  }
+
+  /**
+   * Get the Title text for the file, from options, then from db, otherwise ''
+   *
+   * @return string
+   *  The Title text
+   */
+  private function getTitle() {
+    if (!is_null($this->options->title)) {
+      return $this->options->title;
+    }
+
+    if (!is_null($this->media)) {
+      return $this->media->title;
+    }
+
+    return '';
+  }
+
+  /**
+   * Get the Name text for the file, from options, then from db, otherwise ''
+   *
+   * @return string
+   *  The Name text
+   */
+  private function getName() {
+    if (!is_null($this->options->name)) {
+      return $this->options->name;
+    }
+
+    if (!is_null($this->media)) {
+      return $this->media->name;
+    }
+
+    return '';
+  }
+
+  /**
    * Calculate the weight of the image compared to others in the group
    *
    * @return int
@@ -299,6 +373,7 @@ trait MediaTrait {
       'filename' => $this->directory_uri . $this->filename_new,
       'mime' => $this->file->getMimeType(),
       'size' => $this->file->getSize(),
+      'alt' => $this->getAlt(),
       'group' => $this->group,
       'status' => TRUE,
       'weight' => $this->getWeight(),
@@ -317,7 +392,7 @@ trait MediaTrait {
     $existing_media = $this->getMedia($this->group);
 
     if (!$existing_media->isEmpty()) {
-      return $this->deleteMedia();
+      return $this->deleteMedia($this->group);
     }
 
     return 0;
