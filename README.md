@@ -6,9 +6,9 @@ This package saves uploaded files and links them with models
 
 Using Composer, edit your `composer.json` file to require `devfactory/media`.
 
-	"require": {
-		"devfactory/media": "1.0.*"
-	}
+    "require": {
+      "devfactory/media": "1.0.*"
+    }
 
 Then from the terminal run
 
