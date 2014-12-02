@@ -16,11 +16,7 @@ Then from the terminal run
 
 Then in your `app/config/app.php` file register the service provider:
 
-    'Devfactory\Media\MediaServiceProvider',
-
-and add the Facade accessor:
-
-    'Sanitize' => 'Webpatser\Sanitize\Sanitize',
+    'Devfactory\Media\MediaServiceProvider'
 
 Run the migration to create the DB table:
 

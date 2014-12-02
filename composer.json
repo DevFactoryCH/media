@@ -2,6 +2,7 @@
   "name": "devfactory/media",
   "description": "Laravel package for saving uploaded files and linking them with models",
   "license": "MIT",
+  "version": "1.0.1",
   "authors": [
     {
       "name": "DevFactory Sarl",
@@ -11,12 +12,9 @@
   "require": {
     "php": ">=5.4.0",
     "illuminate/support": "4.*",
-    "webpatser/laravel-sanitize": "dev-master"
+    "that0n3guy/transliteration": "1.0.*"
   },
   "autoload": {
-    "classmap": [
-      "src/migrations"
-    ],
     "psr-4": {
       "Devfactory\\Media\\": "src/"
     }

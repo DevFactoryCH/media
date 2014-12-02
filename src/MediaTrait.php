@@ -265,7 +265,7 @@ trait MediaTrait {
   private function getFilename() {
     switch (Config::get('media::rename')) {
       case 'transliterate':
-        $this->filename_new = \Sanitize::string($this->filename_original);
+        $this->filename_new = \Transliteration::clean_filename($this->filename_original);
         break;
       case 'unique':
         $this->filename_new = md5(microtime() . str_random(5)) .'.'. $this->filename_original;
