@@ -14,9 +14,10 @@ Then from the terminal run
 
     composer update
 
-Then in your `app/config/app.php` file register the service provider:
+Then in your `app/config/app.php` file register the service providers:
 
-    'Devfactory\Media\MediaServiceProvider'
+    'Devfactory\Media\MediaServiceProvider',
+    'That0n3guy\Transliteration\TransliterationServiceProvider',
 
 Run the migration to create the DB table:
 
