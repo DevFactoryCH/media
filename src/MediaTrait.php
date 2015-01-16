@@ -207,7 +207,13 @@ trait MediaTrait {
    *  The number of elements deleted
    */
   public function deleteMediaById($id) {
-    return $this->removeMedia($this->getMediaById($id));
+    $media = $this->getMediaById($id);
+
+    if (!is_null($media)) {
+      return $this->removeMedia($media);
+    }
+
+    return FALSE;
   }
 
   /**
