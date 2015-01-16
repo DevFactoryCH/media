@@ -2,7 +2,6 @@
   "name": "devfactory/media",
   "description": "Laravel package for saving uploaded files and linking them with models",
   "license": "MIT",
-  "version": "1.0.6",
   "authors": [
     {
       "name": "DevFactory Sarl",
