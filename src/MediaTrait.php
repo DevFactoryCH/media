@@ -450,6 +450,7 @@ trait MediaTrait {
       return TRUE;
     }
 
+    return mkdir($directory, 0755, TRUE);
     return File::makeDirectory($directory, 0755, TRUE);
   }
 
