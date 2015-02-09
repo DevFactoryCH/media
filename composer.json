@@ -24,7 +24,7 @@
   "repositories": [
     {
       "type": "vcs",
-      "url": "../transliteration"
+      "url": "https://github.com/markcameron/transliteration"
     }
   ],
   "minimum-stability": "stable"
