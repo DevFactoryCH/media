@@ -19,8 +19,6 @@ class MediaServiceProvider extends ServiceProvider {
 	public function boot() {
     $this->publishConfig();
     $this->publishMigration();
-
-		$this->package('devfactory/media', 'media', __DIR__);
 	}
 
 	/**
