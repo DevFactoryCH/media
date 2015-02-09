@@ -10,8 +10,8 @@
   ],
   "require": {
     "php": ">=5.4.0",
-    "illuminate/support": "4.*",
-    "that0n3guy/transliteration": "1.0.*"
+    "illuminate/support": "~5.0",
+    "that0n3guy/transliteration": "dev-2.0"
   },
   "autoload": {
     "classmap": [
@@ -21,10 +21,11 @@
       "Devfactory\\Media\\": "src/"
     }
   },
-  "extra": {
-    "branch-alias": {
-      "dev-master": "1.0.x-dev"
+  "repositories": [
+    {
+      "type": "vcs",
+      "url": "https://github.com/markcameron/transliteration"
     }
-  },
+  ],
   "minimum-stability": "stable"
 }
