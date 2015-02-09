@@ -32,10 +32,10 @@ trait MediaTrait {
    * but actual trait __contruct()'s are bad apparently)
    */
   private function setup() {
-    $this->public_path = rtrim(Config::get('media::public_path'), '/\\') . '/';
-    $this->files_directory = rtrim(ltrim(Config::get('media::files_directory'), '/\\'), '/\\') . '/';
+    $this->public_path = rtrim(config('media.config.public_path'), '/\\') . '/';
+    $this->files_directory = rtrim(ltrim(config('media.config.files_directory'), '/\\'), '/\\') . '/';
 
-    $this->create_sub_directories = Config::get('media::sub_directories');
+    $this->create_sub_directories = config('media.config.sub_directories');
 
     $this->directory = $this->public_path . $this->files_directory;
     if ($this->create_sub_directories) {
@@ -269,7 +269,7 @@ trait MediaTrait {
    *  The parsed filename
    */
   private function getFilename() {
-    switch (Config::get('media::rename')) {
+    switch (config('media.config.rename')) {
       case 'transliterate':
         $this->filename_new = \Transliteration::clean_filename($this->filename_original);
         break;
@@ -450,7 +450,6 @@ trait MediaTrait {
       return TRUE;
     }
 
-    return mkdir($directory, 0755, TRUE);
     return File::makeDirectory($directory, 0755, TRUE);
   }
 
