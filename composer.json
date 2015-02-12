@@ -11,7 +11,7 @@
   "require": {
     "php": ">=5.4.0",
     "illuminate/support": "~5.0",
-    "that0n3guy/transliteration": "2.0.x-dev"
+    "that0n3guy/transliteration": "2.0.x"
   },
   "autoload": {
     "classmap": [
@@ -21,11 +21,5 @@
       "Devfactory\\Media\\": "src/"
     }
   },
-  "repositories": [
-    {
-      "type": "vcs",
-      "url": "https://github.com/markcameron/transliteration"
-    }
-  ],
   "minimum-stability": "stable"
 }
