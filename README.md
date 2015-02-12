@@ -22,6 +22,7 @@ Then in your `app/config/app.php` file register the service providers:
 'Devfactory\Media\MediaServiceProvider',
 'That0n3guy\Transliteration\TransliterationServiceProvider',
 ```
+
 From within the the laravel folder of your project, run:
 
     php artisan vendor:publish
@@ -48,6 +49,7 @@ Then in your `app/config/app.php` file register the service providers:
 'Devfactory\Media\MediaServiceProvider',
 'That0n3guy\Transliteration\TransliterationServiceProvider',
 ```
+
 Run the migration to create the DB table:
 
     php artisan migrate --package=devfactory/media
