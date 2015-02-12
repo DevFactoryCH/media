@@ -4,6 +4,35 @@ This package saves uploaded files and links them with models
 
 ## Installation
 
+### Laravel 5
+
+Using Composer, edit your `composer.json` file to require `devfactory/media`.
+
+    "require": {
+      "devfactory/media": "2.0.*"
+    }
+
+Then from the terminal run
+
+    composer update
+
+Then in your `app/config/app.php` file register the service providers:
+
+```php
+'Devfactory\Media\MediaServiceProvider',
+'That0n3guy\Transliteration\TransliterationServiceProvider',
+```
+
+From within the the laravel folder of your project, run:
+
+    php artisan vendor:publish
+
+Followed by:
+
+    php artisan migrate
+
+### Laravel 4
+
 Using Composer, edit your `composer.json` file to require `devfactory/media`.
 
     "require": {
@@ -16,8 +45,10 @@ Then from the terminal run
 
 Then in your `app/config/app.php` file register the service providers:
 
-    'Devfactory\Media\MediaServiceProvider',
-    'That0n3guy\Transliteration\TransliterationServiceProvider',
+```php
+'Devfactory\Media\MediaServiceProvider',
+'That0n3guy\Transliteration\TransliterationServiceProvider',
+```
 
 Run the migration to create the DB table:
 
