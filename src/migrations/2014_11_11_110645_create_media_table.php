@@ -20,9 +20,9 @@ class CreateMediaTable extends Migration {
       $table->string('filename');
       $table->string('mime');
       $table->bigInteger('size')->unsigned()->nullable()->default(NULL);
-      $table->string('name')->nullable();
-      $table->string('alt')->nullable();
-      $table->string('title')->nullable();
+      $table->string('name');
+      $table->string('alt');
+      $table->string('title');
       $table->string('group');
       $table->boolean('status');
       $table->integer('weight')->unsigned()->default(0);
