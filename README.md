@@ -6,6 +6,8 @@ This package saves uploaded files and links them with models
 
 ### Laravel 5
 
+> *NOTE*: If upgrading from 2.0.0, run `php artisan vendor:publish` and `php artisan migrate`
+
 Using Composer, edit your `composer.json` file to require `devfactory/media`.
 
     "require": {
