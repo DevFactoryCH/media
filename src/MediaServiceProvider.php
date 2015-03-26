@@ -44,6 +44,10 @@ class MediaServiceProvider extends ServiceProvider {
    * Publish the package configuration
    */
   protected function publishConfig() {
+    $this->mergeConfigFrom(
+      __DIR__ . '/config/config.php', 'media.config'
+    );
+
     $this->publishes([
       __DIR__ . '/config/config.php' => config_path('media.config.php'),
     ]);
