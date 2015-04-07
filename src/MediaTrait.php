@@ -23,7 +23,7 @@ trait MediaTrait {
   protected $public_path;
   protected $files_directory;
   protected $directory;
-  protected $directory_uri = '';
+  protected $directory_uri;
 
   protected $create_sub_directories;
 
@@ -39,7 +39,7 @@ trait MediaTrait {
 
     $this->directory = $this->public_path . $this->files_directory;
     if ($this->create_sub_directories) {
-      $this->directory_uri .= Str::lower(class_basename($this)) . '/';
+      $this->directory_uri = Str::lower(class_basename($this)) . '/';
     }
 
     $this->directory .= $this->directory_uri;
