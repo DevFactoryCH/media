@@ -369,7 +369,7 @@ trait MediaTrait {
       return $this->media->name;
     }
 
-    return '';
+    return basename($this->media->filename, PATHINFO_FILENAME);
   }
 
   /**
@@ -403,6 +403,7 @@ trait MediaTrait {
       'mime' => $this->file->getMimeType(),
       'size' => $this->file->getSize(),
       'alt' => $this->getAlt(),
+      'name' => $this->filename_new,
       'group' => $this->group,
       'status' => TRUE,
       'weight' => $this->getWeight(),

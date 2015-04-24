@@ -20,4 +20,8 @@ class Media extends \Eloquent {
     return $this->morphTo();
   }
 
+  public function getUrlAttribute() {
+    return \Url::asset(\Config::get('media::files_directory') . $this->filename);
+  }
+
 }
