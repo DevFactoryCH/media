@@ -19,6 +19,14 @@ return array(
   'sub_directories' => TRUE,
 
   /**
+   * Set to TRUE if you want sub directories by Model and then sub directories
+   * by model ID to be created in the upload folder. If TRUE this takes
+   * precedence over 'sub_directories'. FALSE if you want to have them all in
+   * the root.
+   */
+  'sub_directories_by_id' => FALSE,
+
+  /**
    * Define how to rename filenames, options are:
    *
    * - 'nothing' [NOT RECOMMENDED¨]

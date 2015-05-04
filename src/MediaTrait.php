@@ -36,10 +36,14 @@ trait MediaTrait {
     $this->files_directory = rtrim(ltrim(Config::get('media::files_directory'), '/\\'), '/\\') . '/';
 
     $this->create_sub_directories = Config::get('media::sub_directories');
+    $this->create_sub_directories_by_id = Config::get('media::sub_directories_by_id');
 
     $this->directory = $this->public_path . $this->files_directory;
     if ($this->create_sub_directories) {
       $this->directory_uri = Str::lower(class_basename($this)) . '/';
+    }
+    if ($this->create_sub_directories) {
+      $this->directory_uri = Str::lower(class_basename($this)) . '/' . $this->id . '/';
     }
 
     $this->directory .= $this->directory_uri;
