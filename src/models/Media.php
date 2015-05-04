@@ -21,7 +21,7 @@ class Media extends \Eloquent {
   }
 
   public function getUrlAttribute() {
-    return \Url::asset(\Config::get('media::files_directory') . $this->filename);
+    return url(\Config::get('media::files_directory') . $this->filename);
   }
 
   public function getTitleAttribute($value) {
