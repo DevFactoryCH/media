@@ -48,8 +48,10 @@ trait MediaTrait {
 
     $this->directory .= $this->directory_uri;
 
-    $this->filename_original = $this->file->getClientOriginalName();
-    $this->filename_new = $this->getFilename();
+    if (!empty($this->file)) {
+      $this->filename_original = $this->file->getClientOriginalName();
+      $this->filename_new = $this->getFilename();
+    }
   }
 
   /**
@@ -246,6 +248,8 @@ trait MediaTrait {
    * @return void
    */
   private function removeMedia($media) {
+    $this->setup();
+
     File::delete($this->public_path . $this->files_directory . $media->filename);
     $media->delete();
   }
