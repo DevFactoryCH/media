@@ -443,6 +443,15 @@ trait MediaTrait {
   }
 
   /**
+   * Clone a file from passed Media Object to a new Media location on disk
+   */
+  private function storageClone() {
+    if ($this->makeDirectory($this->directory)) {
+      File::copy($this->public_path . $this->files_directory . $this->media->filename, $this->directory . basename($this->media->filename));
+    }
+  }
+
+  /**
    * Creates the passed directory if it doesn't exist
    *
    * @param $directory string
@@ -457,6 +466,26 @@ trait MediaTrait {
     }
 
     return File::makeDirectory($directory, 0755, TRUE);
+  }
+
+  /**
+   * Clone an existing media item, onto a new model instance.
+   *
+   * @param object $media
+   *  The old Media that should be cloned to the current instance.
+   *
+   * @return void
+   */
+  public function cloneMedia($media) {
+    $this->media = $media;
+    $this->setup();
+
+    $fillable_data = array_only($this->media->toArray(), $this->media->getFillable());
+    $fillable_data['filename'] = $this->directory_uri . basename($this->media->filename);
+
+    $this->media()->save(new Media($fillable_data));
+
+    $this->storageClone();
   }
 
 }
