@@ -24,4 +24,12 @@ class Media extends \Eloquent {
     return \Url::asset(\Config::get('media::files_directory') . $this->filename);
   }
 
+  public function getTitleAttribute($value) {
+    if (empty($value)) {
+      return basename($this->attributes['filename']);
+    }
+
+    return $value;
+  }
+
 }
