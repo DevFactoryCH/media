@@ -26,6 +26,7 @@ trait MediaTrait {
   protected $directory_uri;
 
   protected $create_sub_directories;
+  protected $create_sub_directories_by_id;
 
   /**
    * Setup variables and file systems (basically constructor,
