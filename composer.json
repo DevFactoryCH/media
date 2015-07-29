@@ -10,8 +10,8 @@
   ],
   "require": {
     "php": ">=5.4.0",
-    "illuminate/support": "4.*",
-    "that0n3guy/transliteration": "1.0.*"
+    "illuminate/support": "~5.0",
+    "that0n3guy/transliteration": "2.0.x"
   },
   "autoload": {
     "classmap": [
@@ -19,11 +19,6 @@
     ],
     "psr-4": {
       "Devfactory\\Media\\": "src/"
-    }
-  },
-  "extra": {
-    "branch-alias": {
-      "dev-master": "1.0.x-dev"
     }
   },
   "minimum-stability": "stable"

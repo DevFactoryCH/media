@@ -23,7 +23,7 @@ trait MediaTrait {
   protected $public_path;
   protected $files_directory;
   protected $directory;
-  protected $directory_uri = '';
+  protected $directory_uri;
 
   protected $create_sub_directories;
 
@@ -32,20 +32,22 @@ trait MediaTrait {
    * but actual trait __contruct()'s are bad apparently)
    */
   private function setup() {
-    $this->public_path = rtrim(Config::get('media::public_path'), '/\\') . '/';
-    $this->files_directory = rtrim(ltrim(Config::get('media::files_directory'), '/\\'), '/\\') . '/';
+    $this->public_path = rtrim(config('media.config.public_path'), '/\\') . '/';
+    $this->files_directory = rtrim(ltrim(config('media.config.files_directory'), '/\\'), '/\\') . '/';
 
-    $this->create_sub_directories = Config::get('media::sub_directories');
+    $this->create_sub_directories = config('media.config.sub_directories');
 
     $this->directory = $this->public_path . $this->files_directory;
     if ($this->create_sub_directories) {
-      $this->directory_uri .= Str::lower(class_basename($this)) . '/';
+      $this->directory_uri = Str::lower(class_basename($this)) . '/';
     }
 
     $this->directory .= $this->directory_uri;
 
-    $this->filename_original = $this->file->getClientOriginalName();
-    $this->filename_new = $this->getFilename();
+    if (!empty($this->file)) {
+      $this->filename_original = $this->file->getClientOriginalName();
+      $this->filename_new = $this->getFilename();
+    }
   }
 
   /**
@@ -242,6 +244,8 @@ trait MediaTrait {
    * @return void
    */
   private function removeMedia($media) {
+    $this->setup();
+
     File::delete($this->public_path . $this->files_directory . $media->filename);
     $media->delete();
   }
@@ -269,7 +273,7 @@ trait MediaTrait {
    *  The parsed filename
    */
   private function getFilename() {
-    switch (Config::get('media::rename')) {
+    switch (config('media.config.rename')) {
       case 'transliterate':
         $this->filename_new = \Transliteration::clean_filename($this->filename_original);
         break;
@@ -402,7 +406,9 @@ trait MediaTrait {
       'filename' => $this->directory_uri . $this->filename_new,
       'mime' => $this->file->getMimeType(),
       'size' => $this->file->getSize(),
+      'title' => $this->getTitle(),
       'alt' => $this->getAlt(),
+      'name' => $this->getName(),
       'group' => $this->group,
       'status' => TRUE,
       'weight' => $this->getWeight(),
@@ -437,6 +443,15 @@ trait MediaTrait {
   }
 
   /**
+   * Clone a file from passed Media Object to a new Media location on disk
+   */
+  private function storageClone() {
+    if ($this->makeDirectory($this->directory)) {
+      File::copy($this->public_path . $this->files_directory . $this->media->filename, $this->directory . basename($this->media->filename));
+    }
+  }
+
+  /**
    * Creates the passed directory if it doesn't exist
    *
    * @param $directory string
@@ -451,6 +466,26 @@ trait MediaTrait {
     }
 
     return File::makeDirectory($directory, 0755, TRUE);
+  }
+
+  /**
+   * Clone an existing media item, onto a new model instance.
+   *
+   * @param object $media
+   *  The old Media that should be cloned to the current instance.
+   *
+   * @return void
+   */
+  public function cloneMedia($media) {
+    $this->media = $media;
+    $this->setup();
+
+    $fillable_data = array_only($this->media->toArray(), $this->media->getFillable());
+    $fillable_data['filename'] = $this->directory_uri . basename($this->media->filename);
+
+    $this->media()->save(new Media($fillable_data));
+
+    $this->storageClone();
   }
 
 }

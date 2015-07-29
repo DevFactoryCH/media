@@ -17,7 +17,8 @@ class MediaServiceProvider extends ServiceProvider {
    * @return void
    */
 	public function boot() {
-		$this->package('devfactory/media', 'media', __DIR__);
+    $this->publishConfig();
+    $this->publishMigration();
 	}
 
 	/**
@@ -26,18 +27,39 @@ class MediaServiceProvider extends ServiceProvider {
 	 * @return void
 	 */
 	public function register() {
-		$this->app['media'] = $this->app->share(function($app) {
-      return new Media;
-    });
+
 	}
 
-	/**
-	 * Get the services provided by the provider.
-	 *
-	 * @return array
-	 */
-	public function provides() {
-		return array('media');
-	}
+  /**
+   * Get the services provided by the provider.
+   *
+   * @return array
+   */
+  public function provides() {
+    return ['media'];
+  }
+
+
+  /**
+   * Publish the package configuration
+   */
+  protected function publishConfig() {
+    $this->mergeConfigFrom(
+      __DIR__ . '/config/config.php', 'media.config'
+    );
+
+    $this->publishes([
+      __DIR__ . '/config/config.php' => config_path('media.config.php'),
+    ]);
+  }
+
+  /**
+   * Publish the migration stub
+   */
+  protected function publishMigration() {
+    $this->publishes([
+      __DIR__ . '/migrations' => base_path('database/migrations')
+    ]);
+  }
 
 }

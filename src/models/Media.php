@@ -1,5 +1,7 @@
 <?php namespace Devfactory\Media\Models;
 
+use Illuminate\Support\Facades\URL;
+
 class Media extends \Eloquent {
 
   protected $table = 'media';
@@ -18,6 +20,18 @@ class Media extends \Eloquent {
 
   public function mediable() {
     return $this->morphTo();
+  }
+
+  public function getUrlAttribute() {
+    return Url::asset(config('media.config.files_directory') . $this->filename);
+  }
+
+  public function getTitleAttribute($value) {
+    if (empty($value)) {
+      return basename($this->attributes['filename']);
+    }
+
+    return $value;
   }
 
 }
