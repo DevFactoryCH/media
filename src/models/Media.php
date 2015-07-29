@@ -1,5 +1,7 @@
 <?php namespace Devfactory\Media\Models;
 
+use Illuminate\Support\Facades\URL;
+
 class Media extends \Eloquent {
 
   protected $table = 'media';
@@ -21,7 +23,7 @@ class Media extends \Eloquent {
   }
 
   public function getUrlAttribute() {
-    return \Url::asset(\Config::get('media::files_directory') . $this->filename);
+    return Url::asset(config('media.config.files_directory') . $this->filename);
   }
 
   public function getTitleAttribute($value) {
