@@ -1,6 +1,13 @@
 <?php
 
 return array(
+
+  /**
+   * If you want to override functionality in the model, you can set your custom eloquent model here
+   * and just make it extend \Devfactory\Media\Models\Media
+   */
+  'model' => 'Devfactory\Media\Models\Media',
+
   /**
    * The location of the public folder for your laravel installation
    */
@@ -32,4 +39,5 @@ return array(
    *   spaces with _'s and removing accents and special characters.
    */
   'rename' => 'transliterate',
+
 );

@@ -4,8 +4,6 @@ use Illuminate\Support\Facades\Config;
 use Illuminate\Support\Str;
 use File;
 
-use Devfactory\Media\Models\Media;
-
 trait MediaTrait {
 
   protected $file;
@@ -56,7 +54,7 @@ trait MediaTrait {
 	 * @return Illuminate\Database\Eloquent\Collection
 	 */
 	public function media() {
-		return $this->morphMany('Devfactory\Media\Models\Media', 'mediable');
+		return $this->morphMany(config('media.config.model'), 'mediable');
 	}
 
   /**
@@ -117,7 +115,8 @@ trait MediaTrait {
 
     $this->parseOptions();
 
-    $this->media = Media::find($id);
+    $model = config('media.config.model');
+    $this->media = $model::find($id);
 
     $this->media->alt = $this->getAlt();
     $this->media->title = $this->getTitle();
@@ -414,7 +413,8 @@ trait MediaTrait {
       'weight' => $this->getWeight(),
     ];
 
-    return $this->media()->save(new Media($media));
+    $model = config('media.config.model');
+    return $this->media()->save(new $model($media));
   }
 
   /**
@@ -483,7 +483,8 @@ trait MediaTrait {
     $fillable_data = array_only($this->media->toArray(), $this->media->getFillable());
     $fillable_data['filename'] = $this->directory_uri . basename($this->media->filename);
 
-    $this->media()->save(new Media($fillable_data));
+    $model = config('media.config.model');
+    $this->media()->save(new $model($fillable_data));
 
     $this->storageClone();
   }
