@@ -14,9 +14,6 @@
     "that0n3guy/transliteration": "2.0.x"
   },
   "autoload": {
-    "classmap": [
-      "src/migrations"
-    ],
     "psr-4": {
       "Devfactory\\Media\\": "src/"
     }

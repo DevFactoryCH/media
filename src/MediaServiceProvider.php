@@ -54,8 +54,8 @@ class MediaServiceProvider extends ServiceProvider {
    */
   protected function publishMigration() {
     $this->publishes([
-      __DIR__ . '/migrations' => base_path('database/migrations')
-    ]);
+      __DIR__ . '/migrations' => $this->app->databasePath() . '/migrations'
+    ], 'migrations');
   }
 
   /**
