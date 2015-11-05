@@ -192,7 +192,7 @@ trait MediaTrait {
 
     $count = 0;
     foreach ($media as $item) {
-      $count += $this->removeMedia($item);
+      $count += (int) $this->removeMedia($item);
     }
 
     return $count;
@@ -240,13 +240,17 @@ trait MediaTrait {
    * @param $group string
    *  The file group to delete
    *
-   * @return void
+   * @return bool
    */
   private function removeMedia($media) {
     $this->setup();
 
-    File::delete($this->public_path . $this->files_directory . $media->filename);
-    $media->delete();
+    if (File::delete($this->public_path . $this->files_directory . $media->filename)) {
+      $media->delete();
+      return TRUE;
+    }
+
+    return FALSE;
   }
 
   /**
