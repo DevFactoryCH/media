@@ -444,11 +444,16 @@ trait MediaTrait {
 
   /**
    * Clone a file from passed Media Object to a new Media location on disk
+   *
+   * @return bool
+   *  TRUE if the file copied, FALSE if it could not be copied
    */
   private function storageClone() {
     if ($this->makeDirectory($this->directory)) {
-      File::copy($this->public_path . $this->files_directory . $this->media->filename, $this->directory . $this->filename_new);
+      return File::copy($this->public_path . $this->files_directory . $this->media->filename, $this->directory . $this->filename_new);
     }
+
+    return false;
   }
 
   /**
@@ -473,24 +478,27 @@ trait MediaTrait {
    *
    * @param object $media
    *  The old Media that should be cloned to the current instance.
+   * @param bool $storage_clone
+   *  Optionally, also copy the file in storage to a new, unique file
+   * @param $clone_attributes
+   *  Optionally, override certain attributes on the clone
    *
-   * @return void
+   * @return \Devfactory\Media\Models\Media
    */
-  public function cloneMedia($media, $clone_storage = false) {
-    $this->media = $media;
+  public function cloneMedia($media, $clone_storage = false, $clone_attributes = []) {
+    $this->media = $media->replicate();
     $this->setup();
     $this->filename_new = basename($media->filename);
 
     if ($clone_storage) {
       $this->fileExistsRename();
+      $this->storageClone();
     }
 
-    $fillable_data = array_only($this->media->toArray(), $this->media->getFillable());
-    $fillable_data['filename'] = $this->directory_uri . $this->filename_new;
-
-    $this->media()->save(new Media($fillable_data));
-
-    $this->storageClone();
+    $this->media->fill($clone_attributes);
+    $this->media->filename = $this->directory_uri . $this->filename_new;
+    
+    return $this->media()->save($this->media);
   }
 
 }
