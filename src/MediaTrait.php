@@ -476,11 +476,14 @@ trait MediaTrait {
    *
    * @return void
    */
-  public function cloneMedia($media) {
+  public function cloneMedia($media, $clone_storage = false) {
     $this->media = $media;
     $this->setup();
     $this->filename_new = basename($media->filename);
-    $this->fileExistsRename();
+
+    if ($clone_storage) {
+      $this->fileExistsRename();
+    }
 
     $fillable_data = array_only($this->media->toArray(), $this->media->getFillable());
     $fillable_data['filename'] = $this->directory_uri . $this->filename_new;
