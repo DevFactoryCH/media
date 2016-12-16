@@ -447,7 +447,7 @@ trait MediaTrait {
    */
   private function storageClone() {
     if ($this->makeDirectory($this->directory)) {
-      File::copy($this->public_path . $this->files_directory . $this->media->filename, $this->directory . basename($this->media->filename));
+      File::copy($this->public_path . $this->files_directory . $this->media->filename, $this->directory . $this->filename_new);
     }
   }
 
@@ -479,9 +479,11 @@ trait MediaTrait {
   public function cloneMedia($media) {
     $this->media = $media;
     $this->setup();
+    $this->filename_new = basename($media->filename);
+    $this->fileExistsRename();
 
     $fillable_data = array_only($this->media->toArray(), $this->media->getFillable());
-    $fillable_data['filename'] = $this->directory_uri . basename($this->media->filename);
+    $fillable_data['filename'] = $this->directory_uri . $this->filename_new;
 
     $this->media()->save(new Media($fillable_data));
 
