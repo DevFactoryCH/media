@@ -27,7 +27,7 @@ class MediaServiceProvider extends ServiceProvider {
 	 * @return void
 	 */
 	public function register() {
-
+    $this->mergeConfig();
 	}
 
   /**
@@ -44,10 +44,6 @@ class MediaServiceProvider extends ServiceProvider {
    * Publish the package configuration
    */
   protected function publishConfig() {
-    $this->mergeConfigFrom(
-      __DIR__ . '/config/config.php', 'media.config'
-    );
-
     $this->publishes([
       __DIR__ . '/config/config.php' => config_path('media.config.php'),
     ]);
@@ -58,8 +54,17 @@ class MediaServiceProvider extends ServiceProvider {
    */
   protected function publishMigration() {
     $this->publishes([
-      __DIR__ . '/migrations' => base_path('database/migrations')
-    ]);
+      __DIR__ . '/migrations' => $this->app->databasePath() . '/migrations'
+    ], 'migrations');
+  }
+
+  /**
+   * Merge media config with users.
+   */
+  private function mergeConfig() {
+    $this->mergeConfigFrom(
+      __DIR__ . '/config/config.php', 'media.config'
+    );
   }
 
 }

@@ -4,8 +4,6 @@ use Illuminate\Support\Facades\Config;
 use Illuminate\Support\Str;
 use File;
 
-use Devfactory\Media\Models\Media;
-
 trait MediaTrait {
 
   protected $file;
@@ -51,13 +49,13 @@ trait MediaTrait {
   }
 
   /**
-	 * Returns a collection of Media related to the model
-	 *
-	 * @return Illuminate\Database\Eloquent\Collection
-	 */
-	public function media() {
-		return $this->morphMany('Devfactory\Media\Models\Media', 'mediable');
-	}
+   * Returns a collection of Media related to the model
+   *
+   * @return Illuminate\Database\Eloquent\Collection
+   */
+  public function media() {
+    return $this->morphMany(config('media.config.model'), 'mediable');
+  }
 
   /**
    * Save the media to disk and DB
@@ -117,7 +115,8 @@ trait MediaTrait {
 
     $this->parseOptions();
 
-    $this->media = Media::find($id);
+    $model = config('media.config.model');
+    $this->media = $model::find($id);
 
     $this->media->alt = $this->getAlt();
     $this->media->title = $this->getTitle();
@@ -193,7 +192,7 @@ trait MediaTrait {
 
     $count = 0;
     foreach ($media as $item) {
-      $count += $this->removeMedia($item);
+      $count += (int) $this->removeMedia($item);
     }
 
     return $count;
@@ -241,13 +240,17 @@ trait MediaTrait {
    * @param $group string
    *  The file group to delete
    *
-   * @return void
+   * @return bool
    */
   private function removeMedia($media) {
     $this->setup();
 
-    File::delete($this->public_path . $this->files_directory . $media->filename);
-    $media->delete();
+    if (File::delete($this->public_path . $this->files_directory . $media->filename)) {
+      $media->delete();
+      return TRUE;
+    }
+
+    return FALSE;
   }
 
   /**
@@ -414,7 +417,8 @@ trait MediaTrait {
       'weight' => $this->getWeight(),
     ];
 
-    return $this->media()->save(new Media($media));
+    $model = config('media.config.model');
+    return $this->media()->save(new $model($media));
   }
 
   /**
@@ -497,7 +501,7 @@ trait MediaTrait {
 
     $this->media->fill($clone_attributes);
     $this->media->filename = $this->directory_uri . $this->filename_new;
-    
+
     return $this->media()->save($this->media);
   }
 
