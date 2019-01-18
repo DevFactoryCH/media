@@ -1,8 +1,9 @@
 <?php namespace Devfactory\Media\Models;
 
 use Illuminate\Support\Facades\URL;
+use Illuminate\Database\Eloquent\Model;
 
-class Media extends \Eloquent {
+class Media extends Model {
 
   protected $table = 'media';
 
