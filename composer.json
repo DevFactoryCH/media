@@ -18,5 +18,13 @@
       "Devfactory\\Media\\": "src/"
     }
   },
+  "extra": {
+    "laravel": {
+      "providers": [
+        "Devfactory\\Media\\MediaServiceProvider",
+        "That0n3guy\Transliteration\TransliterationServiceProvider"
+      ]
+    }
+  },
   "minimum-stability": "stable"
 }
