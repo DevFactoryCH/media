@@ -10,7 +10,7 @@
   ],
   "require": {
     "php": ">=5.4.0",
-    "illuminate/support": "~5.0",
+    "illuminate/support": "~5.5",
     "that0n3guy/transliteration": "2.0.x"
   },
   "autoload": {
