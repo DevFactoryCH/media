@@ -22,7 +22,7 @@
     "laravel": {
       "providers": [
         "Devfactory\\Media\\MediaServiceProvider",
-        "That0n3guy\Transliteration\TransliterationServiceProvider"
+        "That0n3guy\\Transliteration\\TransliterationServiceProvider"
       ]
     }
   },
