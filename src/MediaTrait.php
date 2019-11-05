@@ -278,7 +278,7 @@ trait MediaTrait {
   private function getFilename() {
     switch (config('media.config.rename')) {
       case 'transliterate':
-        $this->filename_new = \Transliteration::clean_filename($this->filename_original);
+        $this->filename_new = $this->cleanFilename($this->filename_original);
         break;
       case 'unique':
         $this->filename_new = md5(microtime() . str_random(5)) .'.'. $this->filename_original;
@@ -505,4 +505,104 @@ trait MediaTrait {
     return $this->media()->save($this->media);
   }
 
+  /**
+   * Transliterates and sanitizes a file name.
+   *
+   * The resulting file name has white space replaced with underscores, consists
+   * of only US-ASCII characters, and is converted to lowercase (if configured).
+   * If multiple files have been submitted as an array, the names will be
+   * processed recursively.
+   *
+   * @param $filename
+   *   A file name, or an array of file names.
+   * @param $source_langcode
+   *   Optional ISO 639 language code that denotes the language of the input and
+   *   is used to apply language-specific variations. If the source language is
+   *   not known at the time of transliteration, it is recommended to set this
+   *   argument to the site default language to produce consistent results.
+   *   Otherwise the current display language will be used.
+   * @return
+   *   Sanitized file name, or array of sanitized file names.
+   *
+   * @see language_default()
+   */
+  public function cleanFilename($filename, $source_langcode = NULL) {
+      if (is_array($filename)) {
+          foreach ($filename as $key => $value) {
+              $filename[$key] = $this->cleanFilename($value, $source_langcode);
+          }
+          return $filename;
+      }
+      $filename = $this->transliterationProcess($filename, '', $source_langcode);
+      // Replace whitespace.
+      $filename = str_replace(' ', '_', $filename);
+      // Remove remaining unsafe characters.
+      $filename = preg_replace('![^0-9A-Za-z_.-]!', '', $filename);
+      // Remove multiple consecutive non-alphabetical characters.
+      $filename = preg_replace('/(_)_+|(\.)\.+|(-)-+/', '\\1\\2\\3', $filename);
+      // Force lowercase to prevent issues on case-insensitive file systems.
+      // @todo add "lowercase" config to cabinet config
+//        if (variable_get('transliteration_file_lowercase', TRUE)) {
+//            $filename = strtolower($filename);
+//        }
+      return $filename;
+  }
+
+  /**
+   * Transliterates UTF-8 encoded text to US-ASCII.
+   *
+   * Based on Mediawiki's UtfNormal::quickIsNFCVerify().
+   *      Swiped from drupal's transliteration module: https://drupal.org/project/transliteration
+   *
+   * @param $string
+   *   UTF-8 encoded text input.
+   * @param $unknown
+   *   Replacement string for characters that do not have a suitable ASCII
+   *   equivalent.
+   * @param $source_langcode
+   *   Optional ISO 639 language code that denotes the language of the input and
+   *   is used to apply language-specific variations. If the source language is
+   *   not known at the time of transliteration, it is recommended to set this
+   *   argument to the site default language to produce consistent results.
+   *   Otherwise the current display language will be used.
+   * @return
+   *   Transliterated text.
+   */
+  public function transliterationProcess($string, $unknown = '?', $source_langcode = NULL) {
+    // ASCII is always valid NFC! If we're only ever given plain ASCII, we can
+    // avoid the overhead of initializing the decomposition tables by skipping
+    // out early.
+    if (!preg_match('/[\x80-\xff]/', $string)) {
+      return $string;
+    }
+    static $tail_bytes;
+      if (!isset($tail_bytes)) {
+      // Each UTF-8 head byte is followed by a certain number of tail bytes.
+      $tail_bytes = array();
+      for ($n = 0; $n < 256; $n++) {
+        if ($n < 0xc0) {
+            $remaining = 0;
+        }
+        elseif ($n < 0xe0) {
+            $remaining = 1;
+        }
+        elseif ($n < 0xf0) {
+            $remaining = 2;
+        }
+        elseif ($n < 0xf8) {
+            $remaining = 3;
+        }
+        elseif ($n < 0xfc) {
+            $remaining = 4;
+        }
+        elseif ($n < 0xfe) {
+            $remaining = 5;
+        }
+        else {
+            $remaining = 0;
+        }
+        $tail_bytes[chr($n)] = $remaining;
+      }
+    }
+  }
 }
