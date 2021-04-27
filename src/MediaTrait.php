@@ -45,14 +45,14 @@ trait MediaTrait
 
         $this->directory .= $this->directory_uri;
 
-        if (!empty($this->file)) {
-            $this->filename_original = $this->file->getClientOriginalName();
-            $this->filename_new = $this->getFilename();
-        }
-
         $this->storage_path = '';
         if ($this->create_sub_directories) {
             $this->storage_path = Str::lower(class_basename($this)) . '/';
+        }
+
+        if (!empty($this->file)) {
+            $this->filename_original = $this->file->getClientOriginalName();
+            $this->filename_new = $this->getFilename();
         }
     }
 
