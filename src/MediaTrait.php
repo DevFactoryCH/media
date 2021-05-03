@@ -27,6 +27,9 @@ trait MediaTrait
 
     protected $create_sub_directories;
 
+    protected $mimetype;
+    protected $filesize;
+
     /**
      * Setup variables and file systems (basically constructor,
      * but actual trait __contruct()'s are bad apparently)
@@ -104,6 +107,52 @@ trait MediaTrait
         $result = $this->databasePut();
 
         $this->storagePut();
+
+        return $result;
+    }
+
+    /**
+     * Move existing media from bucket, and save the media to required place
+     *
+     * @param $file object
+     *  The Symfony\Component\HttpFoundation\File\UploadedFile Object
+     *
+     * @param $group string
+     *  The group of file being uploaded, to allow for say a profile picture and a
+     *  background to be uploaded for a user
+     *
+     * @param $type string
+     *  If the field is for a single file that gets deleted set it to 'single',
+     *  or if it is a multiple file upload, set it to 'multiple'
+     *
+     * @param $options array
+     *  An array of extra options for the file
+     *
+     * @return object
+     *  The Devfactory\Media\Models\Media Object
+     */
+    public function s3MoveAndSaveMedia($file, $group = 'default', $type = 'single', $options = [])
+    {
+        $this->filename_original = $file['name'];
+        $this->filename_new = $this->getFilename();
+        $this->mimetype = $file['content_type'];
+        $this->filesize = Storage::size($file['key']);
+
+        $this->group = $group;
+        $this->type   = $type;
+        $this->options = $options;
+
+        $this->setup();
+
+        $this->parseOptions();
+
+        if ($this->type == 'single') {
+            $this->removeExistingMedia();
+        }
+
+        $result = $this->databasePut();
+
+        $this->storageS3Move($file);
 
         return $result;
     }
@@ -434,8 +483,8 @@ trait MediaTrait
     {
         $media = [
             'filename' => $this->directory_uri . $this->filename_new,
-            'mime' => $this->file->getMimeType(),
-            'size' => $this->file->getSize(),
+            'mime' => $this->getMimeType(),
+            'size' => $this->getFileSize(),
             'title' => $this->getTitle(),
             'alt' => $this->getAlt(),
             'name' => $this->getName(),
@@ -446,6 +495,44 @@ trait MediaTrait
 
         $model = config('media.config.model');
         return $this->media()->save(new $model($media));
+    }
+
+    /**
+     * Retrieve file mime-type
+     *
+     * @return object
+     *  Devfactory\Media\Models\Media Object
+     */
+    private function getMimeType()
+    {
+        if ($this->file) {
+            return $this->file->getMimeType();
+        }
+
+        if (!empty($this->mimetype)) {
+            return $this->mimetype;
+        }
+
+        return '';
+    }
+
+    /**
+     * Retrieve file size
+     *
+     * @return object
+     *  Devfactory\Media\Models\Media Object
+     */
+    private function getFileSize()
+    {
+        if ($this->file) {
+            return $this->file->getSize();
+        }
+
+        if (!empty($this->filesize)) {
+            return $this->filesize;
+        }
+
+        return null;
     }
 
     /**
@@ -471,9 +558,16 @@ trait MediaTrait
     private function storagePut()
     {
         Storage::putFileAs($this->storage_path, $this->file, $this->filename_new, 'public');
-        // if ($this->makeDirectory($this->directory)) {
-        //     $this->file->move($this->directory, $this->filename_new);
-        // }
+    }
+
+    /**
+     * Copy an existing media file from a bucket
+     */
+    private function storageS3Move($file)
+    {
+        $new_file = $this->storage_path . $file['name'];
+        Storage::move($file['key'], $new_file);
+        Storage::setVisibility($new_file, 'public');
     }
 
     /**
@@ -485,11 +579,6 @@ trait MediaTrait
     private function storageClone()
     {
         return Storage::copy($this->media->filename, $this->storage_path . $this->filename_new);
-        // if ($this->makeDirectory($this->directory)) {
-        //     return File::copy($this->public_path . $this->files_directory . $this->media->filename, $this->directory . $this->filename_new);
-        // }
-
-        // return false;
     }
 
     /**
