@@ -565,7 +565,7 @@ trait MediaTrait
      */
     private function storageS3Move($file)
     {
-        $new_file = $this->storage_path . $file['name'];
+        $new_file = $this->storage_path . $this->filename_new;
         Storage::move($file['key'], $new_file);
         Storage::setVisibility($new_file, 'public');
     }
