@@ -133,6 +133,8 @@ trait MediaTrait
      */
     public function s3MoveAndSaveMedia($file, $group = 'default', $type = 'single', $options = [])
     {
+        $this->setup();
+
         $this->filename_original = $file['name'];
         $this->filename_new = $this->getFilename();
         $this->mimetype = $file['content_type'];
@@ -141,8 +143,6 @@ trait MediaTrait
         $this->group = $group;
         $this->type   = $type;
         $this->options = $options;
-
-        $this->setup();
 
         $this->parseOptions();
 
