@@ -25,7 +25,7 @@ Then in your `app/config/app.php` file register the service providers:
 'That0n3guy\Transliteration\TransliterationServiceProvider',
 ```
 
-From within the the laravel folder of your project, run:
+From within the laravel folder of your project, run:
 
     php artisan vendor:publish
 
